@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exercise 2 — Verify Before You Share</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --purple: #534AB7; --purple-light: #EEEDFE; --purple-dark: #3C3489;
+  --teal: #1D9E75; --teal-light: #E1F5EE; --teal-dark: #085041;
+  --coral: #D85A30; --coral-light: #FAECE7; --coral-dark: #712B13;
+  --amber: #BA7517; --amber-light: #FAEEDA; --amber-dark: #633806;
+  --green-light: #EAF3DE; --green-dark: #27500A;
+  --red-light: #FCEBEB; --red-dark: #791F1F;
+  --gray-100: #F1EFE8; --gray-200: #D3D1C7;
+  --text: #1a1a1a; --text-muted: #5F5E5A; --border: rgba(0,0,0,0.12);
+  --bg: #ffffff; --bg-surface: #F8F7F4;
+  --radius: 8px; --radius-lg: 12px;
+}
+body { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; line-height: 1.65; color: var(--text); background: var(--bg-surface); padding: 2rem 1rem; }
+.page { max-width: 760px; margin: 0 auto; }
+.module-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--purple); background: var(--purple-light); padding: 4px 10px; border-radius: var(--radius); margin-bottom: 1rem; }
+h1 { font-size: 26px; font-weight: 500; margin-bottom: 0.4rem; }
+h2 { font-size: 17px; font-weight: 500; margin-bottom: 0.75rem; }
+.subtitle { font-size: 14px; color: var(--text-muted); margin-bottom: 0.5rem; }
+.instructions { background: var(--purple-light); border-left: 3px solid var(--purple); border-radius: 0 var(--radius) var(--radius) 0; padding: 0.9rem 1.1rem; margin-bottom: 2rem; font-size: 14px; color: var(--purple-dark); }
+.email-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 2rem; }
+.email-header { border-bottom: 0.5px solid var(--border); padding-bottom: 0.75rem; margin-bottom: 1rem; }
+.email-field { display: flex; gap: 8px; font-size: 13px; margin-bottom: 4px; }
+.email-label { color: var(--text-muted); min-width: 40px; }
+.email-body { font-size: 14px; line-height: 1.7; }
+.highlight { background: var(--amber-light); border-bottom: 1.5px solid var(--amber); cursor: pointer; border-radius: 2px; padding: 0 2px; transition: background 0.12s; }
+.highlight:hover { background: #F0D090; }
+.highlight.reviewed { background: var(--teal-light); border-bottom-color: var(--teal); }
+.highlight.flagged { background: var(--red-light); border-bottom-color: var(--coral); }
+.section-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin: 1.5rem 0 0.75rem; display: flex; align-items: center; gap: 8px; }
+.section-label::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
+.claims-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 1.5rem; }
+.claims-table th { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); text-align: left; padding: 8px 10px; border-bottom: 0.5px solid var(--gray-200); }
+.claims-table td { padding: 10px 10px; border-bottom: 0.5px solid var(--border); vertical-align: top; font-size: 13px; }
+.claims-table tr:last-child td { border-bottom: none; }
+.claim-text { font-weight: 500; margin-bottom: 2px; }
+.claim-sub { color: var(--text-muted); font-size: 12px; }
+.verdict-select { font-size: 13px; padding: 4px 8px; border-radius: var(--radius); border: 0.5px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; }
+.verdict-select.accurate { background: var(--teal-light); border-color: var(--teal); color: var(--teal-dark); }
+.verdict-select.inaccurate { background: var(--red-light); border-color: var(--coral); color: var(--red-dark); }
+.verdict-select.unverifiable { background: var(--amber-light); border-color: var(--amber); color: var(--amber-dark); }
+.row-feedback { font-size: 12px; padding: 6px 9px; border-radius: var(--radius); margin-top: 6px; display: none; }
+.row-feedback.show { display: block; }
+.fb-correct { background: var(--teal-light); color: var(--teal-dark); }
+.fb-wrong { background: var(--red-light); color: var(--red-dark); }
+.check-btn { margin-top: 0.5rem; padding: 7px 16px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--bg); font-size: 13px; cursor: pointer; color: var(--text); }
+.check-btn:hover { background: var(--bg-surface); }
+.submit-btn { padding: 9px 22px; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--bg); font-size: 14px; cursor: pointer; color: var(--text); margin-top: 1rem; }
+.submit-btn:hover { background: var(--bg-surface); }
+.score-card { display: none; margin-top: 1.5rem; padding: 1rem 1.25rem; border-radius: var(--radius-lg); background: var(--purple-light); color: var(--purple-dark); font-size: 14px; }
+.score-card.show { display: block; }
+.score-card strong { font-size: 22px; font-weight: 500; display: block; margin-bottom: 4px; }
+.legend { display: flex; gap: 12px; font-size: 12px; margin-bottom: 1rem; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 5px; color: var(--text-muted); }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="module-tag"><i class="ti ti-brain"></i> AI Fluency · Module 3 · Exercise 2</div>
+  <h1>Verify before you share</h1>
+  <p class="subtitle">Individual · ~30 min · Intermediate</p>
+  <div class="instructions">
+    Below is a draft announcement written by an AI tool. It contains 4 specific claims — some accurate, some not. For each claim in the verification log, select the correct verdict. Then read the explanation to understand why.
+  </div>
+
+  <div class="section-label">AI-generated draft</div>
+  <div class="email-card">
+    <div class="email-header">
+      <div class="email-field"><span class="email-label">To:</span> All Staff</div>
+      <div class="email-field"><span class="email-label">From:</span> L&amp;D Team</div>
+      <div class="email-field"><span class="email-label">Subject:</span> Introducing AI tools to our workflow — what you need to know</div>
+    </div>
+    <div class="email-body">
+      <p>We are pleased to share that our team will begin using AI-assisted tools starting next quarter. As part of this rollout, all employees will complete a mandatory <span class="highlight" id="h0">3-hour AI literacy certification</span> developed in partnership with our software provider.</p>
+      <p style="margin-top:0.75rem">According to a <span class="highlight" id="h1">2023 McKinsey Global Survey, 78% of organizations using AI tools reported measurable gains in team productivity within the first six months</span> of adoption. We expect similar outcomes for our teams.</p>
+      <p style="margin-top:0.75rem">The tools will be available to all staff on the <span class="highlight" id="h2">Professional plan and above</span>, with advanced features rolling out in <span class="highlight" id="h3">Q3 of this year</span>. Further guidance will follow from your line manager.</p>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot" style="background:#FAEEDA;border:1px solid #BA7517"></span> Claims to verify</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#E1F5EE;border:1px solid #1D9E75"></span> Reviewed</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#FCEBEB;border:1px solid #D85A30"></span> Flagged</span>
+  </div>
+
+  <div class="section-label">Verification log</div>
+  <table class="claims-table">
+    <thead>
+      <tr>
+        <th style="width:38%">Claim</th>
+        <th style="width:28%">What to check</th>
+        <th style="width:34%">Your verdict</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <div class="claim-text">3-hour AI literacy certification</div>
+          <div class="claim-sub">Mandatory training developed with the software provider</div>
+        </td>
+        <td style="color:var(--text-muted)">Does this programme exist? Was it developed with the vendor? Is it 3 hours?</td>
+        <td>
+          <select class="verdict-select" id="v0" onchange="updateStyle(0)">
+            <option value="">Select verdict</option>
+            <option value="accurate">Accurate</option>
+            <option value="inaccurate">Inaccurate</option>
+            <option value="unverifiable">Unverifiable</option>
+          </select>
+          <div class="row-feedback" id="rfb0"></div>
+          <button class="check-btn" onclick="checkVerdict(0)" style="margin-top:6px">Check</button>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="claim-text">78% of organisations reported productivity gains</div>
+          <div class="claim-sub">From a 2023 McKinsey Global Survey</div>
+        </td>
+        <td style="color:var(--text-muted)">Does this McKinsey survey exist? Is the 78% figure accurate?</td>
+        <td>
+          <select class="verdict-select" id="v1" onchange="updateStyle(1)">
+            <option value="">Select verdict</option>
+            <option value="accurate">Accurate</option>
+            <option value="inaccurate">Inaccurate</option>
+            <option value="unverifiable">Unverifiable</option>
+          </select>
+          <div class="row-feedback" id="rfb1"></div>
+          <button class="check-btn" onclick="checkVerdict(1)" style="margin-top:6px">Check</button>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="claim-text">Available on Professional plan and above</div>
+          <div class="claim-sub">Plan-level access restriction</div>
+        </td>
+        <td style="color:var(--text-muted)">Is this the correct plan name? Is this the actual access level?</td>
+        <td>
+          <select class="verdict-select" id="v2" onchange="updateStyle(2)">
+            <option value="">Select verdict</option>
+            <option value="accurate">Accurate</option>
+            <option value="inaccurate">Inaccurate</option>
+            <option value="unverifiable">Unverifiable</option>
+          </select>
+          <div class="row-feedback" id="rfb2"></div>
+          <button class="check-btn" onclick="checkVerdict(2)" style="margin-top:6px">Check</button>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div class="claim-text">Advanced features rolling out in Q3</div>
+          <div class="claim-sub">Specific release timeline</div>
+        </td>
+        <td style="color:var(--text-muted)">Has this timeline been confirmed by the product team or official roadmap?</td>
+        <td>
+          <select class="verdict-select" id="v3" onchange="updateStyle(3)">
+            <option value="">Select verdict</option>
+            <option value="accurate">Accurate</option>
+            <option value="inaccurate">Inaccurate</option>
+            <option value="unverifiable">Unverifiable</option>
+          </select>
+          <div class="row-feedback" id="rfb3"></div>
+          <button class="check-btn" onclick="checkVerdict(3)" style="margin-top:6px">Check</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <button class="submit-btn" onclick="submitAll()">See final score</button>
+  <div class="score-card" id="score-card"></div>
+</div>
+
+<script>
+const correctVerdicts = ['unverifiable', 'unverifiable', 'unverifiable', 'unverifiable'];
+const verdictFeedback = {
+  0: {
+    accurate: "Not quite. The AI invented this detail — there is no confirmed 3-hour certification developed with the software provider mentioned anywhere in a real context. Before including training requirements in a staff announcement, confirm the programme exists, the duration, and whether it was genuinely co-developed with the vendor.",
+    inaccurate: "Close, but the better verdict here is 'unverifiable'. You can't confirm it's inaccurate without checking — and you can't find a source that confirms it either. When a specific claim has no traceable source, unverifiable is the right flag before sharing.",
+    unverifiable: "Correct. The specific details here — 3 hours, mandatory, co-developed with the vendor — are the kind of operational claims AI generates plausibly but without a real source. This should be confirmed with the L&D team or the software provider before it goes into any staff communication."
+  },
+  1: {
+    accurate: "Incorrect. Before treating any named survey statistic as accurate, you need to find the actual source. McKinsey does publish real research, but AI can generate convincing fake statistics attributed to credible organisations. The specific figure and survey title need to be verified against McKinsey's published reports.",
+    inaccurate: "Close, but the better verdict here is 'unverifiable'. You don't yet know it's wrong — you just can't confirm it's right. The correct action is to search for the survey, check the figure, and either find the real source or remove the statistic entirely.",
+    unverifiable: "Correct. This is a textbook case for the unverifiable verdict. McKinsey does produce real research, which makes this citation look trustworthy — but AI frequently generates specific statistics and attributes them to credible organisations without those figures existing. Always search for the actual survey before citing it in a company-wide communication."
+  },
+  2: {
+    accurate: "Incorrect. Plan names and access levels are product-specific details that AI often gets wrong — either by using outdated information or by inventing plausible-sounding tier names. 'Professional plan and above' may or may not match the actual product structure. Check the official pricing or access documentation.",
+    inaccurate: "Close, but the better verdict is 'unverifiable'. You can't confirm it's wrong without checking — and that's exactly the point. Product tier names and access rules must be verified against official documentation before appearing in a staff announcement.",
+    unverifiable: "Correct. Plan names, feature availability, and access tiers are exactly the kind of product-specific detail that changes and that AI generates with false confidence. 'Professional plan and above' sounds specific and credible — but without checking official documentation, you can't confirm it's the right plan name or the correct access level."
+  },
+  3: {
+    accurate: "Incorrect. A release timeline in a staff communication should only be confirmed if it matches the official product roadmap or has been communicated by the product team. AI cannot know your organisation's internal release schedule — this detail was generated, not retrieved.",
+    inaccurate: "Close, but the better verdict is 'unverifiable'. The timeline might happen to be correct — but the AI had no way of knowing it. The right action is to confirm with the product team or official roadmap before including it in a communication that staff will rely on.",
+    unverifiable: "Correct. Release timelines are internal commitments that AI cannot know. Even if 'Q3' happens to be accurate, the AI did not retrieve this from a roadmap — it generated a plausible-sounding timeline. Any date or release window in AI-generated content must be confirmed with the people who own it before it's published."
+  }
+};
+function updateStyle(i) {
+  const sel = document.getElementById('v' + i);
+  sel.className = 'verdict-select ' + (sel.value || '');
+}
+function checkVerdict(i) {
+  const sel = document.getElementById('v' + i);
+  const fb = document.getElementById('rfb' + i);
+  const val = sel.value;
+  if (!val) { fb.className = 'row-feedback show wrong-fb'; fb.textContent = 'Please select a verdict first.'; return; }
+  const isCorrect = val === correctVerdicts[i];
+  fb.className = 'row-feedback show ' + (isCorrect ? 'fb-correct' : 'fb-wrong');
+  fb.textContent = verdictFeedback[i][val];
+  const h = document.getElementById('h' + i);
+  if (h) h.className = 'highlight ' + (isCorrect ? 'reviewed' : 'flagged');
+}
+function submitAll() {
+  let score = 0;
+  for (let i = 0; i < 4; i++) {
+    const sel = document.getElementById('v' + i);
+    if (sel.value === correctVerdicts[i]) score++;
+    checkVerdict(i);
+  }
+  const sc = document.getElementById('score-card');
+  sc.classList.add('show');
+  const msgs = ['Review each explanation above — the key skill here is knowing when you cannot confirm something.', 'Good start. Re-read the explanations for the claims you misjudged.', 'Halfway there. Focus on the difference between inaccurate and unverifiable.', 'Strong work. One more to review.', 'Full marks. You correctly identified all four claims as unverifiable — the most important habit in reviewing AI-generated communications.'];
+  sc.innerHTML = '<strong>' + score + '/4</strong>' + msgs[score];
+}
+</script>
+</body>
+</html>
